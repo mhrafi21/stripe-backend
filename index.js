@@ -56,27 +56,58 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // });
 
 //Create Payment Intent and Enable Apple Pay, Google Pay, and Cards
+// app.post("/create-payment-intent", async (req, res) => {
+//   const { amount, fee, acct } = req.body;
+
+//   try {
+//     const paymentIntent = await stripe.paymentIntents.create({
+//       amount: Math.round(amount * 100), // convert GBP → pence
+//       currency: "GBP",
+//       automatic_payment_methods: { enabled: true },
+//       application_fee_amount: Math.round(fee * 100), // convert GBP → pence
+//       transfer_data: {
+//         destination: acct,
+//       },
+//     });
+
+//     res.send({
+//       clientSecret: paymentIntent.client_secret,
+//     });
+//   } catch (error) {
+//     res.status(400).send({ error: error });
+//   }
+// });
+
+
+// for direct charge 
 app.post("/create-payment-intent", async (req, res) => {
-  const { amount, fee, acct } = req.body;
+  const { amount, acct } = req.body;
+
+  // Helper: convert GBP to pence safely
+  const toMinorUnits = (value) => Math.round(value * 100);
 
   try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // convert GBP → pence
-      currency: "GBP",
-      automatic_payment_methods: { enabled: true },
-      application_fee_amount: Math.round(fee * 100), // convert GBP → pence
-      transfer_data: {
-        destination: `${acct}`,
+    const paymentIntent = await stripe.paymentIntents.create(
+      {
+        amount: toMinorUnits(amount), // e.g., 112.45 → 11245 pence
+        currency: "GBP",
+        automatic_payment_methods: { enabled: true },
       },
-    });
+      {
+        stripeAccount: acct, // Run charge directly on connected account
+      }
+    );
 
     res.send({
       clientSecret: paymentIntent.client_secret,
     });
   } catch (error) {
-    res.status(400).send({ error: error });
+    res.status(400).send({ error: error.message });
   }
 });
+
+
+
 
 // This is how we’ll know if the payment was completed:
 // POST /stripe/webhook
