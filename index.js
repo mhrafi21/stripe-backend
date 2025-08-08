@@ -67,7 +67,7 @@ app.post("/create-payment-intent", async (req, res) => {
       automatic_payment_methods: { enabled: true }, // Enables Apple Pay, GPay, and Cards
       application_fee_amount: fee, // 5% fee
       transfer_data: {
-        destination: acct, // Transfer to the seller's account
+        destination: `${acct}`, // Transfer to the seller's account
       },
     });
     
