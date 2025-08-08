@@ -58,19 +58,18 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 //Create Payment Intent and Enable Apple Pay, Google Pay, and Cards
 app.post("/create-payment-intent", async (req, res) => {
   const { amount, fee, acct } = req.body;
-  // const seller = await User.findById(sellerId);
- 
+
   try {
     const paymentIntent = await stripe.paymentIntents.create({
-      amount,
+      amount: Math.round(amount * 100), // convert GBP → pence
       currency: "GBP",
-      automatic_payment_methods: { enabled: true }, // Enables Apple Pay, GPay, and Cards
-      application_fee_amount: fee, // 5% fee
+      automatic_payment_methods: { enabled: true },
+      application_fee_amount: Math.round(fee * 100), // convert GBP → pence
       transfer_data: {
-        destination: `${acct}`, // Transfer to the seller's account
+        destination: `${acct}`,
       },
     });
-    
+
     res.send({
       clientSecret: paymentIntent.client_secret,
     });
@@ -78,6 +77,7 @@ app.post("/create-payment-intent", async (req, res) => {
     res.status(400).send({ error: error });
   }
 });
+
 // This is how we’ll know if the payment was completed:
 // POST /stripe/webhook
 // const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
