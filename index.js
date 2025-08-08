@@ -55,7 +55,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 //   res.json({ url: accountLink?.url, id: account?.id });
 // });
 
-//Create Payment Intent and Enable Apple Pay, Google Pay, and Cards
+//Create Payment Intent and Enable Apple Pay, Google Pay, and Cards for destination charge.
 // app.post("/create-payment-intent", async (req, res) => {
 //   const { amount, fee, acct } = req.body;
 
@@ -92,6 +92,7 @@ app.post("/create-payment-intent", async (req, res) => {
         amount: toMinorUnits(amount), // e.g., 112.45 → 11245 pence
         currency: "GBP",
         automatic_payment_methods: { enabled: true },
+        metadata: { integration_check: "direct_charge" },
       },
       {
         stripeAccount: acct, // Run charge directly on connected account
