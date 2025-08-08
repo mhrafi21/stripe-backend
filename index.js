@@ -8,7 +8,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "https://currycravings.foodpos.io"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -57,7 +57,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 //Create Payment Intent and Enable Apple Pay, Google Pay, and Cards
 app.post("/create-payment-intent", async (req, res) => {
-  const { amount, fee, acc } = req.body;
+  const { amount, fee, acct } = req.body;
   // const seller = await User.findById(sellerId);
  
   try {
@@ -67,7 +67,7 @@ app.post("/create-payment-intent", async (req, res) => {
       automatic_payment_methods: { enabled: true }, // Enables Apple Pay, GPay, and Cards
       application_fee_amount: fee, // 5% fee
       transfer_data: {
-        destination: acc, // Transfer to the seller's account
+        destination: acct, // Transfer to the seller's account
       },
     });
     
